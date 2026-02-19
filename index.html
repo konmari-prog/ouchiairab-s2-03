@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>第3回 クリック率が変わる！AIサムネイル作成術 | おうちAIラボ Season2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: "#F490A1",
+        "primary-dark": "#E87A8E",
+        mint: "#5BAFAF",
+        "mint-light": "#D4EEEE",
+        "mint-bg": "#F0F8F8",
+        "page-bg": "#F5F9F9",
+        "icon-bg": "#FFF0F2",
+        "text-main": "#2D3436",
+        "text-sub": "#6B7B7B",
+        "text-answer": "#3D4A4A",
+      },
+      fontFamily: {
+        sans: ["Noto Sans JP", "sans-serif"],
+      },
+    },
+  },
+};
+</script>
+<style>
+body { font-family: 'Noto Sans JP', sans-serif; }
+.hero-gradient {
+  background: linear-gradient(135deg, #F490A1 0%, #E87A8E 100%);
+  position: relative; overflow: hidden;
+}
+.hero-gradient::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;
+}
+.hero-gradient::after {
+  content: ''; position: absolute; bottom: -30px; left: -30px;
+  width: 120px; height: 120px; background: rgba(255,255,255,0.07); border-radius: 50%;
+}
+.step-number {
+  width: 2.5rem; height: 2.5rem;
+  background: linear-gradient(135deg, #F490A1, #E87A8E);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: bold; flex-shrink: 0;
+}
+.prompt-box {
+  background: #1e1e1e; border-radius: 0.75rem; position: relative;
+}
+.prompt-box pre {
+  color: #e2e8f0; font-family: 'Noto Sans JP', monospace;
+  font-size: 14px; line-height: 1.8; padding: 1.25rem; padding-right: 4rem;
+  margin: 0; white-space: pre-wrap; word-break: break-all;
+}
+.copy-btn { transition: all 0.2s; }
+.copy-btn:hover { transform: scale(1.05); }
+.copy-btn.copied { background: #5BAFAF !important; color: #fff !important; }
+.section-divider {
+  border: none; height: 1px;
+  background: linear-gradient(90deg, transparent, #E87A8E40, transparent);
+  margin: 2.5rem 0;
+}
+.tool-badge-gpts {
+  background: linear-gradient(135deg, #10a37f, #0d8c6d);
+  color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+.tool-badge-miri {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+}
+@media print {
+  .no-print { display: none !important; }
+  .hero-gradient { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body class="bg-page-bg text-text-main">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm no-print">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+  <div class="flex items-center space-x-2">
+    <span class="material-icons text-primary text-xl">palette</span>
+    <span class="font-bold text-base tracking-tight">おうちAIラボ S2</span>
+  </div>
+  <nav class="flex items-center space-x-3 text-sm font-medium">
+    <a class="hover:text-primary transition-colors hidden sm:block" href="#why">なぜ？</a>
+    <a class="hover:text-primary transition-colors hidden sm:block" href="#miricanvas">MiriCanvas</a>
+    <a class="hover:text-primary transition-colors hidden sm:block" href="#design-tips">デザイン</a>
+    <a class="hover:text-primary transition-colors" href="#mygpt">マイGPT</a>
+    <a class="hover:text-primary transition-colors" href="#practice">実践</a>
+    <a class="hover:text-primary transition-colors" href="#checklist">チェック</a>
+  </nav>
+</div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero-gradient py-14 lg:py-16 text-white">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 text-center relative z-10">
+  <span class="inline-block bg-white/20 text-white text-xs font-medium tracking-widest px-4 py-1 rounded-full mb-4">おうちAIラボ Season2 ─ SNS × コンテンツ販売</span>
+  <h1 class="text-3xl md:text-4xl font-extrabold mb-3 leading-tight">
+    クリック率が変わる！<br/>AIサムネイル作成術
+  </h1>
+  <p class="text-white/80 text-base mb-5">第3回｜2026.2.21（土）講師：コンマリ</p>
+  <div class="flex flex-wrap justify-center gap-3 text-sm">
+    <span class="bg-white/20 backdrop-blur-sm rounded-full px-4 py-1.5">配布資料 + 実践ガイド</span>
+    <span class="bg-white/20 backdrop-blur-sm rounded-full px-4 py-1.5">復習・おさらい対応</span>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Section 1: 今日のゴール（前回からの流れ統合）                   -->
+<!-- ============================================================ -->
+<section class="max-w-3xl mx-auto px-4 sm:px-6 -mt-5 relative z-10">
+<div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 sm:p-8">
+  <div class="flex items-center gap-3 mb-5">
+    <div class="step-number text-lg">1</div>
+    <div>
+      <h2 class="text-xl font-bold">本日のウェビナーゴール</h2>
+      <p class="text-xs text-text-sub mt-0.5">この3つができたら今日は大成功！</p>
+    </div>
+  </div>
+
+  <div class="space-y-3 mb-5">
+    <div class="flex items-start gap-3 bg-icon-bg rounded-xl p-4 border border-primary/15">
+      <span class="material-icons text-primary text-xl mt-0.5">check_circle</span>
+      <div>
+        <p class="text-sm font-bold text-text-main">MiriCanvasにログイン・Proプランを使えるようにする</p>
+        <p class="text-xs text-text-sub mt-1">無料で使えるデザインツール。今日中にセットアップ完了！</p>
+      </div>
+    </div>
+    <div class="flex items-start gap-3 bg-icon-bg rounded-xl p-4 border border-primary/15">
+      <span class="material-icons text-primary text-xl mt-0.5">check_circle</span>
+      <div>
+        <p class="text-sm font-bold text-text-main">カスタムGPTを使ってブラッシュアップ</p>
+        <p class="text-xs text-text-sub mt-1">専用GPTs「ブランドメイカー」で素材をまとめて提案してもらおう</p>
+      </div>
+    </div>
+    <div class="flex items-start gap-3 bg-icon-bg rounded-xl p-4 border border-primary/15">
+      <span class="material-icons text-primary text-xl mt-0.5">check_circle</span>
+      <div>
+        <p class="text-sm font-bold text-text-main">サムネを作って販売できる準備をする</p>
+        <p class="text-xs text-text-sub mt-1">MiriCanvasで仕上げて、ココナラ・Xに設置するところまで！</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-primary-dark/5 rounded-xl p-3 mb-5">
+    <p class="text-sm text-text-main text-center font-bold">
+      <span class="text-primary-dark">第2回で見つけた自分の方向性</span>を、今日は<span class="text-primary-dark">ビジュアルで表現する日</span>です
+    </p>
+  </div>
+
+  <!-- 5つの神器カード -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+    <div class="bg-mint-bg rounded-xl p-3 text-center border border-mint/30">
+      <span class="material-icons text-mint text-xl">edit_note</span>
+      <p class="font-bold text-xs mt-1.5 whitespace-nowrap">プロフィール文</p>
+      <p class="text-[10px] text-text-sub mt-0.5 leading-tight">X用+ココナラ用</p>
+    </div>
+    <div class="bg-icon-bg rounded-xl p-3 text-center border border-primary/10">
+      <span class="material-icons text-primary text-xl">image</span>
+      <p class="font-bold text-xs mt-1.5 whitespace-nowrap">商品サムネ</p>
+      <p class="text-[10px] text-text-sub mt-0.5 leading-tight">1220×1240 px</p>
+    </div>
+    <div class="bg-icon-bg rounded-xl p-3 text-center border border-primary/10">
+      <span class="material-icons text-primary text-xl">face</span>
+      <p class="font-bold text-xs mt-1.5 whitespace-nowrap">アイコン</p>
+      <p class="text-[10px] text-text-sub mt-0.5 leading-tight">400×400 px</p>
+    </div>
+    <div class="bg-icon-bg rounded-xl p-3 text-center border border-primary/10">
+      <span class="material-icons text-primary text-xl">panorama_wide_angle</span>
+      <p class="font-bold text-xs mt-1.5 whitespace-nowrap">ココナラバナー</p>
+      <p class="text-[10px] text-text-sub mt-0.5 leading-tight">2560×840 px</p>
+    </div>
+    <div class="bg-icon-bg rounded-xl p-3 text-center border border-primary/10">
+      <span class="material-icons text-primary text-xl">panorama</span>
+      <p class="font-bold text-xs mt-1.5 whitespace-nowrap">Xバナー</p>
+      <p class="text-[10px] text-text-sub mt-0.5 leading-tight">1500×500 px</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- Section 2: なぜビジュアルが必要か                              -->
+<!-- ============================================================ -->
+<section id="why" class="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+<div class="flex items-center gap-3 mb-6">
+  <div class="step-number text-lg">2</div>
+  <h2 class="text-xl font-bold">なぜビジュアルが必要か</h2>
+</div>
+
+<div class="grid sm:grid-cols-3 gap-4">
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="w-10 h-10 rounded-xl bg-icon-bg flex items-center justify-center mb-3">
+      <span class="material-icons text-primary text-lg">timer</span>
+    </div>
+    <h3 class="font-bold text-sm mb-1">第一印象は3秒</h3>
+    <p class="text-xs text-text-sub leading-relaxed">「読むか・スルーするか」を判断する時間。ビジュアルで3秒を制する。</p>
+  </div>
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="w-10 h-10 rounded-xl bg-mint-bg flex items-center justify-center mb-3">
+      <span class="material-icons text-mint text-lg">verified</span>
+    </div>
+    <h3 class="font-bold text-sm mb-1">デザイン＝信頼</h3>
+    <p class="text-xs text-text-sub leading-relaxed">整ったビジュアルは「この人ちゃんとしてるな」というプロ感を生む。</p>
+  </div>
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="w-10 h-10 rounded-xl bg-icon-bg flex items-center justify-center mb-3">
+      <span class="material-icons text-primary text-lg">rocket_launch</span>
+    </div>
+    <h3 class="font-bold text-sm mb-1">60点でOK！</h3>
+    <p class="text-xs text-text-sub leading-relaxed">まずは形にすること。あとから何度でも直せる。出さないのが一番もったいない。</p>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl p-4 border border-primary/15 text-center mt-5">
+  <p class="text-sm text-text-main">
+    <span class="font-bold text-primary-dark">第2回で言語化した「自分の強み」</span>を、今日は<span class="font-bold text-primary-dark">ビジュアルで伝える</span>力に変えよう
+  </p>
+</div>
+</section>
+
+<hr class="section-divider max-w-3xl mx-auto"/>
+
+<!-- ============================================================ -->
+<!-- Section 3: MiriCanvasセットアップ                             -->
+<!-- ============================================================ -->
+<section id="miricanvas" class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+<div class="flex items-center gap-3 mb-6">
+  <div class="step-number text-lg">3</div>
+  <h2 class="text-xl font-bold">MiriCanvasセットアップ</h2>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+  <div class="flex items-center gap-3 mb-2">
+    <div class="w-10 h-10 rounded-xl bg-mint-bg flex items-center justify-center">
+      <span class="material-icons text-mint text-lg">card_giftcard</span>
+    </div>
+    <div>
+      <h3 class="text-base font-bold">ログイン＆クーポン適用</h3>
+      <p class="text-xs text-text-sub">Pro機能を使うために、クーポンを適用しよう</p>
+    </div>
+  </div>
+
+  <div class="space-y-3 mt-5">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">1</span>
+        <h4 class="font-bold text-sm">アカウント作成＆ログイン</h4>
+      </div>
+      <p class="text-xs text-text-sub mb-2">MiriCanvasにアクセスして、無料アカウントを作成しましょう。</p>
+      <div class="flex flex-wrap gap-2">
+        <a href="https://www.miricanvas.com/" target="_blank" class="inline-flex items-center gap-1 text-xs text-primary font-medium underline">
+          <span class="material-icons text-sm">open_in_new</span>MiriCanvas
+        </a>
+        <a href="https://help.miricanvas.com/hc/ja/articles/25867251714841" target="_blank" class="inline-flex items-center gap-1 text-xs text-text-sub font-medium underline">
+          <span class="material-icons text-sm">help_outline</span>ログイン方法ヘルプ
+        </a>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">2</span>
+        <h4 class="font-bold text-sm">クーポンを登録</h4>
+      </div>
+      <div class="bg-icon-bg rounded-lg p-3 mb-3 border border-primary/10">
+        <p class="text-xs font-bold text-primary-dark mb-1">Proプラン 実質約3か月無料！</p>
+        <ul class="text-xs text-text-sub space-y-0.5">
+          <li>【会員登録者全員】新規会員登録時 Proプラン30日無料</li>
+          <li>【特別クーポン】Proプラン2か月無料</li>
+        </ul>
+      </div>
+      <p class="text-xs text-text-sub mb-2">以下のクーポンコードを登録すると、有料テンプレートやPro機能が使えるようになります。</p>
+      <div class="prompt-box">
+        <pre>SHIFTAIBENEFIT</pre>
+        <button class="copy-btn absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg" onclick="copyPrompt(this)">コピー</button>
+      </div>
+      <a href="https://help.miricanvas.com/hc/ja/articles/49577933254041" target="_blank" class="inline-flex items-center gap-1 text-xs text-text-sub font-medium underline mt-2">
+        <span class="material-icons text-sm">help_outline</span>クーポン登録方法はこちら
+      </a>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">3</span>
+        <h4 class="font-bold text-sm">適用を確認</h4>
+      </div>
+      <p class="text-xs text-text-sub">名前の下が「Pro」になっているか確認しましょう。</p>
+    </div>
+  </div>
+</div>
+
+<!-- テンプレートで作ってみよう -->
+<div class="mt-6">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="tool-badge-miri">MiriCanvas</span>
+    <h3 class="text-base font-bold">テンプレートで作ってみよう</h3>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">4</span>
+        <h4 class="font-bold text-sm">カスタムサイズの作り方</h4>
+      </div>
+      <p class="text-xs text-text-sub mb-3">「新規作成」をクリック → 上部のサイズ欄をクリック →「直接入力」を選んでサイズを入力。</p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div class="bg-icon-bg rounded-lg p-3 text-xs">
+          <p class="font-bold mb-0.5">商品サムネ</p>
+          <p class="text-text-sub">カスタムサイズ<br/>1220 × 1240 px</p>
+        </div>
+        <div class="bg-icon-bg rounded-lg p-3 text-xs">
+          <p class="font-bold mb-0.5">ココナラバナー</p>
+          <p class="text-text-sub">カスタムサイズ<br/>2560 × 840 px</p>
+        </div>
+        <div class="bg-mint-bg rounded-lg p-3 text-xs border border-mint/20">
+          <p class="font-bold mb-0.5">Xバナー</p>
+          <p class="text-text-sub">「Twitter ヘッダー」で検索<br/>1500 × 500 px</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">5</span>
+        <h4 class="font-bold text-sm">テンプレートを選んで試してみよう</h4>
+      </div>
+      <p class="text-xs text-text-sub">検索窓でキーワードを入力 → 好きなテンプレートを選択 → テキストや色を変えてみよう。まずは触って慣れるのが大事！</p>
+    </div>
+  </div>
+
+  <div class="bg-mint-bg rounded-xl p-4 border border-mint/20 text-center mt-4">
+    <p class="flex items-center justify-center gap-2 font-bold text-sm text-text-main">
+      <span class="material-icons text-mint">check_circle</span>
+      作る準備完了！
+    </p>
+    <p class="text-xs text-text-sub mt-1">MiriCanvasの基本操作はバッチリ。デザインのポイントを押さえたら、マイGPTで素材を作ろう</p>
+  </div>
+</div>
+</section>
+
+<hr class="section-divider max-w-3xl mx-auto"/>
+
+<!-- ============================================================ -->
+<!-- Section 4: デザインのポイント                                  -->
+<!-- ============================================================ -->
+<section id="design-tips" class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+<div class="flex items-center gap-3 mb-6">
+  <div class="step-number text-lg">4</div>
+  <h2 class="text-xl font-bold">デザインのポイント</h2>
+</div>
+
+<div class="grid sm:grid-cols-3 gap-4 mb-5">
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="w-10 h-10 rounded-full bg-icon-bg flex items-center justify-center mb-3 mx-auto">
+      <span class="material-icons text-primary text-lg">text_fields</span>
+    </div>
+    <h3 class="font-bold text-sm text-center mb-3">文字デザイン</h3>
+    <ul class="space-y-2 text-xs text-text-sub">
+      <li class="flex items-start gap-2"><span class="text-primary font-bold">1</span>太く、大きく、短く</li>
+      <li class="flex items-start gap-2"><span class="text-primary font-bold">2</span>一目で伝わるフォントサイズ</li>
+      <li class="flex items-start gap-2"><span class="text-primary font-bold">3</span>キーワードだけ目立たせる</li>
+    </ul>
+  </div>
+
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="w-10 h-10 rounded-full bg-icon-bg flex items-center justify-center mb-3 mx-auto">
+      <span class="material-icons text-primary text-lg">palette</span>
+    </div>
+    <h3 class="font-bold text-sm text-center mb-3">色使いのコツ</h3>
+    <ul class="space-y-2 text-xs text-text-sub">
+      <li class="flex items-start gap-2"><span class="text-primary font-bold">1</span>3色以内に抑える</li>
+      <li class="flex items-start gap-2"><span class="text-primary font-bold">2</span>多すぎると散らかった印象に</li>
+      <li class="flex items-start gap-2"><span class="text-primary font-bold">3</span>メイン1色＋アクセント2色</li>
+    </ul>
+  </div>
+
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="w-10 h-10 rounded-full bg-mint-bg flex items-center justify-center mb-3 mx-auto border border-mint/20">
+      <span class="material-icons text-mint text-lg">crop_free</span>
+    </div>
+    <h3 class="font-bold text-sm text-center mb-3">余白活用法</h3>
+    <ul class="space-y-2 text-xs text-text-sub">
+      <li class="flex items-start gap-2"><span class="text-mint font-bold">1</span>端っこに文字を置かない</li>
+      <li class="flex items-start gap-2"><span class="text-mint font-bold">2</span>中央寄りで視線を集める</li>
+      <li class="flex items-start gap-2"><span class="text-mint font-bold">3</span>余白＝高級感・清潔感</li>
+    </ul>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl p-4 border border-primary/15 text-center">
+  <p class="font-bold text-sm text-primary-dark mb-1">覚えておくルール</p>
+  <p class="text-xs text-text-main">文字は「太く・大きく・短く」/ 色は「3色まで」/ 余白は「味方」</p>
+</div>
+</section>
+
+<hr class="section-divider max-w-3xl mx-auto"/>
+
+<!-- ============================================================ -->
+<!-- Section 5: マイGPT ─ ブランドメイカー登場                     -->
+<!-- ============================================================ -->
+<section id="mygpt" class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+<div class="flex items-center gap-3 mb-6">
+  <div class="step-number text-lg">5</div>
+  <h2 class="text-xl font-bold">マイGPT ─ ブランドメイカー登場</h2>
+</div>
+
+<div class="bg-gradient-to-br from-[#10a37f]/5 to-[#0d8c6d]/10 rounded-2xl p-6 sm:p-8 border border-[#10a37f]/20">
+  <div class="flex items-center gap-3 mb-4">
+    <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-sm">
+      <span class="material-icons text-[#10a37f] text-2xl">smart_toy</span>
+    </div>
+    <div>
+      <p class="text-lg font-bold">おうちAIラボ ブランドメイカー</p>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="tool-badge-gpts">マイGPT</span>
+        <a href="https://chatgpt.com/g/g-6976f1e131608191ad67de5387231eb4-outiairaho-hurantomeika" target="_blank" class="inline-flex items-center gap-1 text-xs text-[#10a37f] font-medium underline">
+          <span class="material-icons text-sm">open_in_new</span>GPTsを開く
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-sm text-text-main leading-relaxed mb-5">
+    受講生専用のGPTs。前回 Gemini Gem で掴んだプロフィール情報を入力すると、ショップの方向性に合わせてブランド素材を一括で提案してくれます。
+  </p>
+
+  <div class="grid sm:grid-cols-3 gap-3 mb-5">
+    <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+      <span class="material-icons text-[#10a37f] text-xl">image</span>
+      <p class="text-xs font-bold mt-1">サムネ提案</p>
+      <p class="text-[10px] text-text-sub">カラー・レイアウトの具体アイデア</p>
+    </div>
+    <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+      <span class="material-icons text-[#10a37f] text-xl">face</span>
+      <p class="text-xs font-bold mt-1">アイコン生成</p>
+      <p class="text-[10px] text-text-sub">DALL-Eで画像を生成</p>
+    </div>
+    <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+      <span class="material-icons text-[#10a37f] text-xl">edit_note</span>
+      <p class="text-xs font-bold mt-1">プロフィール文</p>
+      <p class="text-[10px] text-text-sub">X用・ココナラ用を自動生成</p>
+    </div>
+  </div>
+
+  <div class="bg-white/80 rounded-lg p-4 border border-[#10a37f]/15 mb-3">
+    <p class="text-xs font-bold flex items-center gap-1.5 text-text-main mb-1">
+      <span class="material-icons text-[#10a37f] text-sm">history</span>
+      前回の Gem で作った内容を活かそう
+    </p>
+    <p class="text-xs text-text-sub leading-relaxed">
+      第2回の Gemini Gem「リサーチ＆プロフ作成」で書き出したプロフィール下書き・強み・スキルをマイGPTに入力すると、さらに磨き上げたブランド素材が生まれます。
+    </p>
+  </div>
+
+  <div class="bg-mint-bg rounded-lg px-4 py-2.5 border border-mint/20">
+    <p class="text-xs text-text-main">
+      <span class="material-icons text-mint text-xs align-text-bottom">tips_and_updates</span>
+      第2回は Gemini の Gem、今回は ChatGPT の GPTs。毎回違うAIカスタマイズを体験しよう！
+    </p>
+  </div>
+</div>
+</section>
+
+<hr class="section-divider max-w-3xl mx-auto"/>
+
+<!-- ============================================================ -->
+<!-- Section 6: マイGPTでブランド素材を生み出す                     -->
+<!-- ============================================================ -->
+<section id="practice" class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+<div class="flex items-center gap-3 mb-6">
+  <div class="step-number text-lg">6</div>
+  <h2 class="text-xl font-bold">マイGPTでブランド素材を生み出す</h2>
+</div>
+
+<!-- Step 1: ショップの方向性を入力 -->
+<div class="mb-8">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="tool-badge-gpts">GPTs</span>
+    <h3 class="text-base font-bold">Step 1. ショップの方向性を入力する</h3>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-mint-bg rounded-xl p-4 border border-mint/20">
+      <p class="text-xs font-bold flex items-center gap-1.5 text-text-main mb-1">
+        <span class="material-icons text-mint text-sm">history</span>
+        第2回で下書き済みの方へ
+      </p>
+      <p class="text-xs text-text-sub leading-relaxed">
+        Gemini Gem「リサーチ＆プロフ作成」で作ったプロフィール文がある方は、それをそのままマイGPTに貼り付けましょう。GPTがさらにブラッシュアップしてくれます。
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <p class="text-xs text-text-sub mb-3">マイGPTを開いて、どんなショップ（プロフィール）にしたいかを入力しよう。まだの人は箇条書きでOK。</p>
+      <div class="prompt-box">
+        <pre>【私の特徴】
+・Webデザイン5年
+・イラスト得意
+・親しみやすい対応
+・納期厳守
+
+【ターゲット】
+・ハンドメイド作家さん
+・SNS発信を頑張りたい人
+
+【理想のイメージ】
+・温かみのある / ナチュラル系</pre>
+        <button class="copy-btn absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg" onclick="copyPrompt(this)">コピー</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: サムネイル提案を受け取る -->
+<div class="mb-8">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="tool-badge-gpts">GPTs</span>
+    <h3 class="text-base font-bold">Step 2. サムネイル提案を受け取る</h3>
+    <span class="text-xs bg-icon-bg text-primary-dark font-semibold px-3 py-1 rounded-full border border-primary/20">1220 × 1240 px</span>
+  </div>
+
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <p class="text-xs text-text-sub mb-3">マイGPTがあなたの方向性に合ったサムネイルの構成を提案してくれます。カラーパレット、レイアウト、キャッチコピーの具体アイデアが出てきます。</p>
+    <div class="bg-mint-bg rounded-lg p-4 border border-mint/20 mb-3">
+      <p class="text-xs font-bold flex items-center gap-1.5 text-text-answer">
+        <span class="material-icons text-mint text-sm">lightbulb</span>ポイント
+      </p>
+      <p class="text-xs text-text-sub mt-1">気に入った提案があったら「この方向で具体的に作って」と追加指示しよう。MiriCanvasに入れるテキストやカラーコードも教えてくれるよ。</p>
+    </div>
+    <div class="bg-icon-bg rounded-lg p-4 border border-primary/10">
+      <p class="text-xs font-bold flex items-center gap-1.5 text-text-main mb-1">
+        <span class="material-icons text-primary text-sm">search</span>MiriCanvasでの検索ヒント
+      </p>
+      <p class="text-xs text-text-sub">MiriCanvasのテンプレート検索で「商品バナー」「セール」「ショップ」などのキーワードで検索すると、サムネイルの参考になるテンプレートが見つかります。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3: アイコンを生成する -->
+<div class="mb-8">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="tool-badge-gpts">GPTs</span>
+    <h3 class="text-base font-bold">Step 3. アイコンを生成する</h3>
+    <span class="text-xs bg-icon-bg text-primary-dark font-semibold px-3 py-1 rounded-full border border-primary/20">400 × 400 px</span>
+  </div>
+
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <p class="text-xs text-text-sub mb-3">マイGPTに「アイコンを作って」と伝えるか、以下のプロンプトをChatGPTに直接入力してもOK。</p>
+    <div class="prompt-box">
+      <pre>以下の条件でSNS用のプロフィールアイコンを作成してください。
+
+・スタイル：フラットイラスト / 柔らかい色合い
+・表情：笑顔、親しみやすい
+・背景：シンプルな単色（パステルカラー）
+・特徴：[自分の特徴を入力]
+・サイズ：正方形（SNSアイコン用）</pre>
+      <button class="copy-btn absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg" onclick="copyPrompt(this)">コピー</button>
+    </div>
+    <div class="bg-mint-bg rounded-lg p-4 mt-3 border border-mint/20">
+      <p class="text-xs font-bold flex items-center gap-1.5 text-text-answer">
+        <span class="material-icons text-mint text-sm">lightbulb</span>ポイント
+      </p>
+      <p class="text-xs text-text-sub mt-1">何パターンか作って、自分のイメージに近いものを選ぼう。「もう少し大人っぽく」「色を暖かくして」など追加指示で調整できるよ。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Step 4: バナーアイデアを受け取る -->
+<div class="mb-8">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="tool-badge-gpts">GPTs</span>
+    <h3 class="text-base font-bold">Step 4. バナーアイデアを受け取る</h3>
+  </div>
+
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <p class="text-xs text-text-sub mb-3">マイGPTに「ココナラバナーとXバナーも作って」と伝えると、それぞれのサイズに合わせた構成・キャッチコピー・配色を提案してくれます。合わせて画像生成用のプロンプトも出力されるので、そのままMiriCanvasやChatGPTでも使えます。</p>
+    <div class="grid sm:grid-cols-2 gap-3 mb-3">
+      <div class="bg-icon-bg rounded-lg p-3 text-xs">
+        <p class="font-bold mb-0.5">ココナラバナー</p>
+        <p class="text-text-sub">2560 × 840 px<br/>ストアの第一印象を決める横長バナー</p>
+      </div>
+      <div class="bg-icon-bg rounded-lg p-3 text-xs">
+        <p class="font-bold mb-0.5">Xバナー</p>
+        <p class="text-text-sub">1500 × 500 px<br/>プロフィールを開いた瞬間の看板</p>
+      </div>
+    </div>
+    <div class="bg-mint-bg rounded-lg p-4 border border-mint/20">
+      <p class="text-xs font-bold flex items-center gap-1.5 text-text-answer mb-1">
+        <span class="material-icons text-mint text-sm">auto_awesome</span>GPTで画像生成もできる！
+      </p>
+      <p class="text-xs text-text-sub leading-relaxed">「GPTで画像生成しますか？」と聞かれたら、ぜひ試してみよう。文字は文字化けしやすいので入れず、画像のみ生成 → MiriCanvasで文字を後から入れるのがコツ。プロンプトは400字以内で出力されます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- Step 5: プロフィール文を仕上げる -->
+<div class="mb-6">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="tool-badge-gpts">GPTs</span>
+    <h3 class="text-base font-bold">Step 5. プロフィール文を仕上げる</h3>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <p class="text-xs text-text-sub mb-3">マイGPTが作ったプロフィール文を、プラットフォームごとに最適化しよう。</p>
+      <div class="prompt-box">
+        <pre>上記のプロフィールを以下の2パターンで要約してください。
+
+1. X用（160文字以内）
+2. ココナラ用（500文字以内）
+
+それぞれのプラットフォームの特徴を意識して最適化してください。</pre>
+        <button class="copy-btn absolute top-3 right-3 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg" onclick="copyPrompt(this)">コピー</button>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<hr class="section-divider max-w-3xl mx-auto"/>
+
+<!-- ============================================================ -->
+<!-- Section 7: GPTで作ったアイディアをMiriCanvasで編集             -->
+<!-- ============================================================ -->
+<section id="finish" class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+<div class="flex items-center gap-3 mb-6">
+  <div class="step-number text-lg">7</div>
+  <h2 class="text-xl font-bold">GPTで作ったアイディアをMiriCanvasで編集</h2>
+</div>
+
+<div class="bg-white rounded-xl p-5 border border-primary/15 text-center mb-5">
+  <p class="font-bold text-primary-dark">
+    GPTsで生み出した素材を → MiriCanvasにアップロード → テキスト追加・色調整 → 完成！
+  </p>
+</div>
+
+<div class="space-y-4">
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">1</span>
+      <h4 class="font-bold text-sm">GPTで作った画像をアップロード</h4>
+    </div>
+    <p class="text-xs text-text-sub">MiriCanvasの編集ページを開き、GPTsで生成したアイコンや素材画像を「アップロード」からドラッグ＆ドロップ。</p>
+  </div>
+
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">2</span>
+      <h4 class="font-bold text-sm">テキストを追加し、フォント・色を調整</h4>
+    </div>
+    <ul class="space-y-2 text-xs text-text-sub">
+      <li class="flex items-start gap-2"><span class="material-icons text-primary text-sm mt-0.5">arrow_forward</span>テキストを追加して、キャッチコピーや商品名を入れる（GPT提案を活用）</li>
+      <li class="flex items-start gap-2"><span class="material-icons text-primary text-sm mt-0.5">arrow_forward</span>フォントと色を調整（3色以内が鉄則）</li>
+      <li class="flex items-start gap-2"><span class="material-icons text-primary text-sm mt-0.5">arrow_forward</span>画像の配置・サイズを整える</li>
+    </ul>
+  </div>
+
+  <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="w-7 h-7 rounded-lg bg-mint-bg text-mint text-xs font-bold flex items-center justify-center border border-mint/20">3</span>
+      <h4 class="font-bold text-sm">PNG形式でダウンロード</h4>
+    </div>
+    <p class="text-xs text-text-sub">右上の「ダウンロード」→ PNG を選択して保存しよう。</p>
+  </div>
+</div>
+</section>
+
+<hr class="section-divider max-w-3xl mx-auto"/>
+
+<!-- ============================================================ -->
+<!-- Section 8: 完了チェックリスト                                 -->
+<!-- ============================================================ -->
+<section id="checklist" class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+<div class="flex items-center gap-3 mb-6">
+  <div class="step-number text-lg">8</div>
+  <h2 class="text-xl font-bold">完了チェックリスト</h2>
+</div>
+
+<div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+  <p class="text-xs text-text-sub mb-4">今日の講座で作ったものを確認しよう。未完成のものは 2/25のハンズオンで仕上げられるよ！</p>
+  <div class="space-y-3">
+    <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-icon-bg/50 transition-colors cursor-pointer">
+      <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary">
+      <div>
+        <p class="font-bold text-xs">商品サムネイル画像（1220×1240px）</p>
+        <p class="text-[11px] text-text-sub">GPTsで提案→MiriCanvasで作成→PNGダウンロード</p>
+      </div>
+    </label>
+    <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-icon-bg/50 transition-colors cursor-pointer">
+      <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary">
+      <div>
+        <p class="font-bold text-xs">アイコン画像（400×400px）</p>
+        <p class="text-[11px] text-text-sub">GPTsで生成→気に入ったものを保存</p>
+      </div>
+    </label>
+    <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-icon-bg/50 transition-colors cursor-pointer">
+      <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary">
+      <div>
+        <p class="font-bold text-xs">ココナラバナー画像（2560×840px）</p>
+        <p class="text-[11px] text-text-sub">GPTsで提案→MiriCanvasで作成→PNGダウンロード</p>
+      </div>
+    </label>
+    <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-icon-bg/50 transition-colors cursor-pointer">
+      <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary">
+      <div>
+        <p class="font-bold text-xs">Xバナー画像（1500×500px）</p>
+        <p class="text-[11px] text-text-sub">GPTsで提案→MiriCanvasで作成→PNGダウンロード</p>
+      </div>
+    </label>
+    <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-icon-bg/50 transition-colors cursor-pointer">
+      <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary">
+      <div>
+        <p class="font-bold text-xs">プロフィール文（X用 + ココナラ用）</p>
+        <p class="text-[11px] text-text-sub">GPTsで生成→自分の言葉で微調整</p>
+      </div>
+    </label>
+    <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-icon-bg/50 transition-colors cursor-pointer">
+      <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary">
+      <div>
+        <p class="font-bold text-xs">X・ココナラにプロフィール設置</p>
+        <p class="text-[11px] text-text-sub">アイコン+バナー+プロフィール文を各プラットフォームに設定</p>
+      </div>
+    </label>
+  </div>
+</div>
+</section>
+
+<!-- Next Step -->
+<section class="max-w-3xl mx-auto px-4 sm:px-6 pb-10">
+<div class="hero-gradient rounded-2xl p-6 text-white text-center">
+  <div class="relative z-10">
+    <span class="material-icons text-3xl mb-2">event</span>
+    <h2 class="text-xl font-bold mb-1">次回予告</h2>
+    <p class="text-white/90 text-sm mb-3">作り途中のサムネイルを完成させよう！</p>
+    <div class="bg-white/20 backdrop-blur-sm rounded-xl p-3 inline-block">
+      <p class="font-bold">ハンズオン② サムネイル作成実践会</p>
+      <p class="text-white/80 text-xs">2/25（水）21:00〜22:00｜さゆっち＆サポートスタッフ</p>
+    </div>
+    <p class="text-xs text-white/70 mt-3">作りかけでも大丈夫。その場で講師に質問しながら仕上げられるよ！</p>
+  </div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-6">
+<div class="max-w-3xl mx-auto px-4 sm:px-6 text-center text-xs text-text-sub">
+  <p class="font-bold text-text-main mb-0.5">おうちAIラボ Season2 ─ SNS × コンテンツ販売シリーズ</p>
+  <p>第3回 配布資料 + 実践ガイド｜講師：コンマリ</p>
+</div>
+</footer>
+
+<script>
+function copyPrompt(btn) {
+  const pre = btn.closest('.prompt-box').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'コピー済';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'コピー';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
